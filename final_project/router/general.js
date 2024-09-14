@@ -22,32 +22,78 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/', function (req, res) {
+public_users.get('/', async function (req, res) {
     //Write your code here
-    res.send(JSON.stringify(books, null, 4));
+    try {
+        const bookList = await new Promise((resolve, reject) => {
+            if (books) {
+                resolve(books);
+            } else {
+                reject(new Error('Books data is not available'));
+            }
+        });
+        res.send(JSON.stringify(bookList, null, 4));
+    } catch (err) {
+        res.status(404).send(err.message);
+    }
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
+public_users.get('/isbn/:isbn', async function (req, res) {
     //Write your code here
     const isbn = req.params.isbn;
-    res.send(books[isbn]);
+    try {
+        const bookDetails = await new Promise((resolve, reject) => {
+            if (books[isbn]) {
+                resolve(books[isbn]);
+            } else {
+                reject(new Error('Book with ISBN does not exist'));
+            }
+        });
+        res.send(bookDetails);
+    } catch (err) {
+        res.status(404).send(err.message);
+    }
 });
 
 // Get book details based on author
-public_users.get('/author/:author', function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
     //Write your code here
     const author = req.params.author;
     const booksArray = Object.values(books);
-    res.send(booksArray.filter(book => book.author === author));
+    try {
+        const bookDetails = await new Promise((resolve, reject) => {
+            const matchingBooks = booksArray.filter(book => book.author === author);
+            if (matchingBooks.length) {
+                resolve(matchingBooks);
+            } else {
+                reject(new Error('Book with specified author does not exist'));
+            }
+        })
+        res.send(bookDetails);
+    } catch (err) {
+        res.status(404).send(err.message);
+    }
 });
 
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
+public_users.get('/title/:title', async function (req, res) {
     //Write your code here
     const title = req.params.title;
     const booksArray = Object.values(books);
-    res.send(booksArray.filter(book => book.title === title));
+    try {
+        const allBooks = await new Promise((resolve, reject) => {
+            const matchingBooks = booksArray.filter(book => book.title === title);
+            if (matchingBooks.length) {
+                resolve(matchingBooks);
+            } else {
+                reject(new Error('Book with specified title does not exist'));
+            }
+        })
+        res.send(allBooks);
+    } catch (err) {
+        res.status(404).send(err.message);
+    }
 });
 
 //  Get book review
